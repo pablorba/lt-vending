@@ -1,33 +1,29 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { LogoMark } from './Logo';
 import { useAuthStore } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
-import { LtvSplash } from './LtvSplash';
 
+// Las pestañas de VendingNav (la-terraza-pos) son aquí el menú principal:
+// este sistema es nada más la parte de vending.
 const NAV = [
-  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/dashboard', label: 'Tablero' },
+  { href: '/llenar', label: 'Qué llenar' },
+  { href: '/surtir', label: 'Surtir' },
+  { href: '/cortes', label: 'Cortes' },
+  { href: '/merma', label: 'Merma' },
+  { href: '/planograma', label: 'Planograma' },
   { href: '/maquinas', label: 'Máquinas' },
   { href: '/productos', label: 'Productos' },
-  { href: '/rutas', label: 'Rutas' },
 ];
-
-// Variable de módulo (no de componente): solo se reinicia cuando el navegador
-// vuelve a ejecutar el script desde cero (carga completa / recarga). Una
-// navegación interna (<Link>) reutiliza el mismo módulo, así que el splash
-// no se repite al cambiar de pestaña dentro de la app — solo al abrir o
-// recargar, igual que en Vault.
-let splashShownThisLoad = false;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, user, logout, hasHydrated } = useAuthStore();
-  const showSplash = useRef(hasHydrated && !splashShownThisLoad);
-  if (hasHydrated && !splashShownThisLoad) splashShownThisLoad = true;
 
   useEffect(() => {
     if (hasHydrated && !isAuthenticated) router.replace('/login');
@@ -35,51 +31,57 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!hasHydrated || !isAuthenticated) return null;
 
+  function doLogout() {
+    logout();
+    router.push('/login');
+  }
+
   return (
-    <div className="min-h-screen bg-bg">
-      <header className="border-b border-border bg-surface">
-        <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-text">
-              <Image src="/logo-icon.png" alt="" width={32} height={31} className="h-6 w-auto" priority />
-              LT Vending
-            </Link>
-            <nav className="cascade flex gap-1">
-              {NAV.map((item, i) => (
+    <div className="min-h-[100dvh] flex flex-col">
+      <header className="bg-ink text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="px-3 sm:px-6 h-14 flex items-center gap-3 md:gap-6">
+          <Link href="/dashboard" aria-label="LT Vending — ir al tablero" className="flex items-center gap-2.5 shrink-0 text-white">
+            <LogoMark className="h-7 w-auto" />
+            <span className="font-display text-[17px] font-medium hidden sm:inline">LT Vending</span>
+          </Link>
+
+          <nav className="flex-1 flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar">
+            {NAV.map((n) => {
+              const active = n.href === '/dashboard' ? pathname === '/dashboard' : pathname?.startsWith(n.href);
+              return (
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{ '--i': i } as React.CSSProperties}
+                  key={n.href}
+                  href={n.href}
                   className={cn(
-                    'press px-3 py-2 rounded-md text-sm font-medium',
-                    pathname?.startsWith(item.href)
-                      ? 'bg-accent-soft text-accent'
-                      : 'text-muted hover:bg-surface-2 hover:text-text',
+                    'h-10 px-3.5 inline-flex items-center rounded-full text-sm font-medium whitespace-nowrap transition',
+                    active ? 'bg-white/10 text-accent-light' : 'text-white/75 hover:text-white hover:bg-white/5',
                   )}
                 >
-                  {item.label}
+                  {n.label}
                 </Link>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center gap-3 text-sm text-muted">
-            <span>{user?.name}</span>
+              );
+            })}
+          </nav>
+
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <span className="text-sm text-white/60">{user?.name}</span>
             <button
-              onClick={() => {
-                logout();
-                router.replace('/login');
-              }}
-              className="btn-secondary press px-3 py-1.5 text-sm"
+              onClick={doLogout}
+              className="text-sm text-white/80 hover:text-white px-3 py-1 rounded-md hover:bg-white/5"
             >
               Salir
             </button>
           </div>
+          <button
+            onClick={doLogout}
+            aria-label="Salir"
+            className="md:hidden shrink-0 text-sm text-white/80 hover:text-white px-2 py-1"
+          >
+            Salir
+          </button>
         </div>
       </header>
-      <main className={cn('max-w-5xl mx-auto px-4 py-6', showSplash.current && 'app-reveal')}>
-        {children}
-      </main>
-      {showSplash.current && <LtvSplash />}
+      <main className="flex-1 min-w-0">{children}</main>
     </div>
   );
 }

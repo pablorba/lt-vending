@@ -1,10 +1,10 @@
 import type { Config } from 'tailwindcss';
 
-// Tokens semánticos (ver app/globals.css para los valores y el por qué de
-// cada uno). Nunca colores sueltos en componentes — siempre estas clases
-// (bg-surface, text-muted, bg-accent, etc.), igual que en Vault.
+// Calcado de la paleta actual de La Terraza (apps/web, rama main): colores de
+// siempre con el acento naranja de Grupo Cesco, superficies sin borde con
+// sombra difusa y radios amplios. No hay modo oscuro — La Terraza tampoco lo
+// tiene en esta sección.
 const config: Config = {
-  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -12,32 +12,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: 'var(--bg)',
-        surface: 'var(--surface)',
-        'surface-2': 'var(--surface-2)',
-        border: 'var(--border)',
-        text: 'var(--text)',
-        muted: 'var(--text-muted)',
-        subtle: 'var(--text-subtle)',
-        // rgb(var(...) / <alpha-value>) habilita modificadores de opacidad
-        // (bg-accent/10, hover:bg-accent/90) aunque el color venga de una
-        // variable CSS.
-        accent: 'rgb(var(--accent-rgb) / <alpha-value>)',
-        'accent-soft': 'var(--accent-soft)',
-        'accent-fg': 'var(--accent-fg)',
-        positive: 'var(--positive)',
-        'positive-soft': 'var(--positive-soft)',
-        warning: 'var(--warning)',
-        'warning-soft': 'var(--warning-soft)',
-        danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
-        'danger-soft': 'var(--danger-soft)',
+        ink: '#151912', // negro/verdoso oscuro principal (header, botón principal, cursor)
+        bone: '#ededed', // claro neutro (fondo)
+        ash: '#a6a6a6', // gris medio: líneas e íconos, nunca texto sobre claro
+        accent: {
+          DEFAULT: '#d68509', // barras, botones (texto en tinta), anillos de foco, pestañas
+          light: '#f0a030', // texto o detalles sobre fondo oscuro
+          ink: '#9c5a06', // texto sobre fondo claro (eyebrow, enlaces)
+        },
+        white: '#ffffff',
+        'ash-ink': '#666666', // texto secundario sobre fondo claro
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)'],
+        display: ['var(--font-sans)'],
+      },
+      borderRadius: {
+        md: '0.5rem',
+        lg: '0.75rem',
+        xl: '1rem',
+        '2xl': '1.25rem',
+        '3xl': '1.5rem',
       },
       boxShadow: {
-        card: 'var(--shadow-card)',
-        float: 'var(--shadow-float)',
+        card: '0 14px 30px rgba(21, 25, 18, 0.06)',
+        'card-hover': '0 18px 40px rgba(21, 25, 18, 0.09)',
+      },
+      transitionTimingFunction: {
+        soft: 'cubic-bezier(.2,.7,.1,1)',
       },
     },
   },

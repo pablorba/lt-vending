@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { AppShell } from '@/components/AppShell';
 import { apiFetch } from '@/lib/api';
+import { formatMoney } from '@/lib/utils';
 import { useAuthStore } from '@/lib/auth-store';
 
 interface Machine {
@@ -26,13 +28,22 @@ interface DashboardData {
   daily: Array<{ date: string; value: number; units: number }>;
 }
 
-function money(n: number) {
-  return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-}
-
 function shortDate(iso: string) {
   const [, m, d] = iso.split('-');
   return `${d}/${m}`;
+}
+
+/** Siempre se ve la gráfica de los últimos 30 días, aunque no haya ventas todavía. */
+function fillDailySeries(daily: Array<{ date: string; value: number; units: number }>, days = 30) {
+  const byDate = new Map(daily.map((d) => [d.date, d]));
+  const out: Array<{ date: string; value: number; units: number }> = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    out.push(byDate.get(key) ?? { date: key, value: 0, units: 0 });
+  }
+  return out;
 }
 
 function ChartTooltip({
@@ -45,10 +56,10 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="card px-3 py-2 text-xs shadow-float">
-      <p className="font-medium text-text">{shortDate(row.date)}</p>
-      <p className="text-muted">
-        {money(row.value)} · {row.units} pzas
+    <div className="card px-3 py-2 text-xs">
+      <p className="font-medium text-ink">{shortDate(row.date)}</p>
+      <p className="text-ash-ink">
+        {formatMoney(row.value)} · {row.units} pzas
       </p>
     </div>
   );
@@ -69,91 +80,118 @@ export default function DashboardPage() {
       .catch(() => setData(null));
   }, []);
 
-  const stats = [
-    {
-      label: 'Máquinas activas',
-      value: machines ? String(machines.filter((m) => m.isActive).length) : '—',
-      tone: 'text-text',
-    },
-    { label: 'Ventas (inferidas)', value: data ? money(data.soldValue) : '—', tone: 'text-text' },
-    {
-      label: 'Utilidad bruta',
-      value: data ? money(data.grossProfit) : '—',
-      hint: data ? `${data.grossMargin}% margen` : undefined,
-      tone: 'text-positive',
-    },
-    {
-      label: 'Merma',
-      value: data ? `${data.wasteUnits} pzas` : '—',
-      hint: data ? `${money(data.wasteCost)} en costo` : undefined,
-      tone: 'text-danger',
-    },
-  ];
+  if (machines && machines.length === 0) {
+    return (
+      <AppShell>
+        <div className="p-6 max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl font-display font-medium text-ink mb-2">Vending</h1>
+          <p className="text-ash-ink mb-6">
+            Todavía no hay máquinas registradas. Al crear una, se genera su planograma.
+          </p>
+          <Link href="/maquinas" className="btn-primary">
+            Agregar máquina
+          </Link>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
-      <h1 className="reveal-line [--i:0] text-lg font-semibold text-text mb-1">
-        Hola, {user?.name?.split(' ')[0] ?? 'operador'}
-      </h1>
-      <p className="reveal-line [--i:1] text-sm text-muted mb-6">Últimos 30 días, todas tus máquinas.</p>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {stats.map((s, i) => (
-          <div key={s.label} className="scroll-rise card p-4" style={{ '--i': i } as React.CSSProperties}>
-            <p className="text-sm text-muted">{s.label}</p>
-            <p className={`text-2xl font-semibold mt-1 ${s.tone}`}>{s.value}</p>
-            {s.hint && <p className="text-xs text-subtle mt-0.5">{s.hint}</p>}
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="lt-hero flex items-start justify-between flex-wrap gap-3 mb-4">
+          <div>
+            <p className="eyebrow">Vending · 30 días</p>
+            <h1 className="text-3xl font-display font-medium text-ink">Tablero</h1>
+            <p className="text-ash-ink text-sm mt-1">
+              Hola, {user?.name?.split(' ')[0] ?? 'operador'}. La venta se estima con el conteo al surtir — no hay
+              lector DEX conectado todavía.
+            </p>
           </div>
-        ))}
-      </div>
+          <Link href="/surtir" className="btn-primary text-sm">
+            Surtir máquina
+          </Link>
+        </div>
 
-      {data && data.daily.length > 0 && (
-        <div className="scroll-rise card p-4 mb-6">
-          <p className="font-medium text-text mb-3">Ventas por día</p>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={data.daily} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Kpi label="Máquinas activas" value={String(machines ? machines.filter((m) => m.isActive).length : '—')} />
+          <Kpi label="Venta (inferida)" value={data ? formatMoney(data.soldValue) : '—'} />
+          <Kpi
+            label="Utilidad bruta"
+            value={data ? formatMoney(data.grossProfit) : '—'}
+            sub={data ? `margen ${data.grossMargin}%` : undefined}
+          />
+          <Kpi
+            label="Merma"
+            value={data ? `${data.wasteUnits} pzas` : '—'}
+            sub={data ? formatMoney(data.wasteCost) + ' a costo' : undefined}
+            danger={!!data && data.wasteUnits > 0}
+          />
+        </div>
+
+        <div className="card p-5 mb-6">
+          <h2 className="font-display font-medium text-ink mb-3">Venta por día</h2>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={fillDailySeries(data?.daily ?? [])} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
               <XAxis
                 dataKey="date"
                 tickFormatter={shortDate}
-                tick={{ fontSize: 11, fill: 'var(--text-subtle)' }}
-                axisLine={{ stroke: 'var(--border)' }}
+                tick={{ fontSize: 11, fill: '#a6a6a6' }}
+                axisLine={{ stroke: '#ededed' }}
                 tickLine={false}
+                interval={Math.max(0, Math.floor(30 / 8))}
               />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgb(var(--accent-rgb) / 0.1)' }} />
-              <Bar dataKey="value" fill="rgb(var(--accent-rgb))" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(21,25,18,0.04)' }} />
+              <Bar dataKey="value" fill="#d68509" radius={[4, 4, 0, 0]} maxBarSize={32} />
             </BarChart>
           </ResponsiveContainer>
+          {data && data.daily.every((d) => d.value === 0) && (
+            <p className="text-xs text-ash-ink text-center mt-2">Sin ventas todavía en los últimos 30 días.</p>
+          )}
         </div>
-      )}
 
-      {data && data.cashDifference !== 0 && (
-        <div className="scroll-rise card p-4 mb-6 border-warning/40 bg-warning-soft">
-          <p className="text-sm text-text">
-            {data.cashDifference > 0
-              ? `Hay ${money(data.cashDifference)} de diferencia: se vendió más de lo que se recogió.`
-              : `Se recogió ${money(-data.cashDifference)} más de lo que marca la venta inferida.`}
-          </p>
-        </div>
-      )}
-
-      {data && data.topProducts.length > 0 && (
-        <div className="scroll-rise card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="font-medium text-text">Top productos (30 días)</p>
+        {data && data.cashDifference !== 0 && (
+          <div className="card p-4 mb-6 bg-amber-50">
+            <p className="text-sm text-ink">
+              {data.cashDifference > 0
+                ? `Hay ${formatMoney(data.cashDifference)} de diferencia: se vendió más de lo que se recogió.`
+                : `Se recogió ${formatMoney(-data.cashDifference)} más de lo que marca la venta inferida.`}{' '}
+              <Link href="/cortes" className="underline">
+                Ver cortes
+              </Link>
+              .
+            </p>
           </div>
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-border">
-              {data.topProducts.slice(0, 10).map((p) => (
-                <tr key={p.productId} className="hover:bg-surface-2">
-                  <td className="px-4 py-2 text-text">{p.name}</td>
-                  <td className="px-4 py-2 text-muted text-right">{p.units} pzas</td>
-                  <td className="px-4 py-2 text-text text-right">{money(p.value)}</td>
-                </tr>
+        )}
+
+        {data && data.topProducts.length > 0 && (
+          <div className="card p-5">
+            <h2 className="font-display font-medium text-ink mb-3">Lo que más se vende</h2>
+            <ul className="space-y-2">
+              {data.topProducts.slice(0, 10).map((p, i) => (
+                <li key={p.productId} className="flex items-center gap-2">
+                  <span className="text-accent-ink font-semibold w-4">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-ink truncate">{p.name}</div>
+                    <div className="text-xs text-ash-ink">{p.units} piezas</div>
+                  </div>
+                  <div className="text-sm font-semibold text-ink whitespace-nowrap">{formatMoney(p.value)}</div>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </ul>
+          </div>
+        )}
+      </div>
     </AppShell>
+  );
+}
+
+function Kpi({ label, value, sub, danger }: { label: string; value: string; sub?: string; danger?: boolean }) {
+  return (
+    <div className="card p-4">
+      <div className="text-xs text-ash-ink">{label}</div>
+      <div className={`text-2xl font-display font-medium mt-1 ${danger ? 'text-red-600' : 'text-ink'}`}>{value}</div>
+      {sub && <div className="text-xs text-ash-ink mt-0.5">{sub}</div>}
+    </div>
   );
 }

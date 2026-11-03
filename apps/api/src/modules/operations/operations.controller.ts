@@ -28,6 +28,18 @@ export class OperationsController {
     return this.service.dashboard(user.tenantId, machineId, f, t);
   }
 
+  @Get('merma')
+  wasteReport(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('machineId') machineId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    const f = from ? new Date(from) : new Date(new Date().setHours(0, 0, 0, 0));
+    const t = to ? new Date(to) : new Date(new Date().setHours(24, 0, 0, 0));
+    return this.service.wasteReport(user.tenantId, machineId, f, t);
+  }
+
   // ----- Plan de surtido (rutas estáticas de /machines antes que :id en MachinesController) -----
   @Get('machines/:id/restock-plan')
   restockPlan(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
@@ -92,6 +104,15 @@ export class OperationsController {
     @Body(new ZodValidationPipe(registerWasteSchema)) body: ReturnType<typeof registerWasteSchema.parse>,
   ) {
     return this.service.registerWaste(user.tenantId, body, user.userId);
+  }
+
+  @Get('collections')
+  listCollections(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('machineId') machineId?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.listCollections(user.tenantId, machineId, limit ? parseInt(limit, 10) : 30);
   }
 
   @Post('collections')

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useAuthStore } from '@/lib/auth-store';
+import { LogoMark } from '@/components/Logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,75 +37,71 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full blur-3xl"
-        style={{ background: 'rgb(var(--accent-rgb) / 0.18)' }}
-      />
-      <div className="card w-full max-w-sm p-6 relative">
-        <Image
-          src="/logo-full.png"
-          alt="LT Vending"
-          width={180}
-          height={168}
-          priority
-          className="reveal-line [--i:0] w-28 h-auto mb-2"
-        />
-        <p className="reveal-line [--i:1] text-sm text-muted mb-6">
-          {mode === 'login' ? 'Entra a tu cuenta' : 'Crea la cuenta de tu operación'}
-        </p>
+    <main className="min-h-[100dvh] flex items-center justify-center px-4 sm:px-6 py-10 bg-bone">
+      <div className="w-full max-w-md">
+        {/* Logo en vector y en tinta, directo sobre el fondo: el mismo que se arma en la apertura. */}
+        <div className="flex items-center justify-center gap-2.5 mb-10 text-ink">
+          <LogoMark className="h-10 w-auto" />
+          <span className="font-display text-2xl font-medium">LT Vending</span>
+        </div>
 
-        <form onSubmit={onSubmit} className="space-y-3">
-          {mode === 'register' && (
-            <>
-              <input
-                className="input"
-                placeholder="Nombre de tu operación"
-                value={tenantName}
-                onChange={(e) => setTenantName(e.target.value)}
-                required
-              />
-              <input
-                className="input"
-                placeholder="Tu nombre"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </>
-          )}
-          <input
-            className="input"
-            type="email"
-            placeholder="Correo"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            className="input"
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <div className="card p-6 sm:p-8">
+          <p className="eyebrow">Control de máquinas de vending</p>
+          <h1 className="text-3xl font-display font-medium text-ink mb-6">
+            {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+          </h1>
 
-          {error && <p className="text-sm text-danger">{error}</p>}
+          <form onSubmit={onSubmit} className="space-y-3">
+            {mode === 'register' && (
+              <>
+                <input
+                  className="input"
+                  placeholder="Nombre de tu operación"
+                  value={tenantName}
+                  onChange={(e) => setTenantName(e.target.value)}
+                  required
+                />
+                <input
+                  className="input"
+                  placeholder="Tu nombre"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </>
+            )}
+            <input
+              className="input"
+              type="email"
+              placeholder="Correo"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              className="input"
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-          <button type="submit" disabled={busy} className="btn-primary press btn-lg w-full">
-            {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button type="submit" disabled={busy} className="btn-primary w-full">
+              {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            </button>
+          </form>
+
+          <button
+            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+            className="mt-4 text-sm text-accent-ink hover:underline"
+          >
+            {mode === 'login' ? '¿Primera vez? Crea tu cuenta' : 'Ya tengo cuenta'}
           </button>
-        </form>
-
-        <button
-          onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-          className="mt-4 text-sm text-accent hover:underline"
-        >
-          {mode === 'login' ? '¿Primera vez? Crea tu cuenta' : 'Ya tengo cuenta'}
-        </button>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

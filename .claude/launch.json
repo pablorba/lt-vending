@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lt-vending-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@ltv/web", "run", "dev"],
+      "port": 3100
+    }
+  ]
+}

@@ -435,6 +435,18 @@ export class OperationsService {
     });
   }
 
+  listCollections(tenantId: string, machineId?: string, limit = 30) {
+    return this.prisma.collection.findMany({
+      where: { tenantId, ...(machineId ? { machineId } : {}) },
+      include: {
+        user: { select: { id: true, name: true } },
+        machine: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
   // ---------------- Dashboard ----------------
 
   /**
@@ -523,6 +535,68 @@ export class OperationsService {
         date,
         value: round2(v.value),
         units: v.units,
+      })),
+    };
+  }
+
+  /**
+   * Reporte de merma: solo lo registrado a mano (caducado, dañado, robo…).
+   * Sin lector DEX no se puede distinguir "vendido" de "faltó sin cobrarse"
+   * a partir del conteo del surtido — por eso no se incluye esa parte aquí
+   * (ver RN y el TODO de DEX en el README).
+   */
+  async wasteReport(tenantId: string, machineId: string | undefined, from: Date, to: Date) {
+    const where: Prisma.WasteEntryWhereInput = {
+      tenantId,
+      createdAt: { gte: from, lt: to },
+      ...(machineId ? { machineId } : {}),
+    };
+
+    const byReason = await this.prisma.wasteEntry.groupBy({
+      by: ['reason'],
+      where,
+      _sum: { quantity: true },
+    });
+    const entries = await this.prisma.wasteEntry.findMany({
+      where,
+      include: {
+        product: { select: { name: true, cost: true } },
+        slot: { select: { code: true } },
+        user: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
+    const byProduct = new Map<string, { name: string; units: number; cost: number }>();
+    let totalUnits = 0;
+    let totalCost = 0;
+    for (const e of entries) {
+      const cost = Number(e.unitCost) * e.quantity;
+      totalUnits += e.quantity;
+      totalCost += cost;
+      const cur = byProduct.get(e.productId) ?? { name: e.product.name, units: 0, cost: 0 };
+      cur.units += e.quantity;
+      cur.cost += cost;
+      byProduct.set(e.productId, cur);
+    }
+
+    return {
+      totals: { units: round2(totalUnits), cost: round2(totalCost) },
+      byReason: byReason.map((r) => ({ reason: r.reason, units: r._sum.quantity ?? 0 })),
+      products: [...byProduct.entries()]
+        .map(([productId, v]) => ({ productId, name: v.name, units: v.units, cost: round2(v.cost) }))
+        .sort((a, b) => b.cost - a.cost),
+      entries: entries.map((e) => ({
+        id: e.id,
+        createdAt: e.createdAt,
+        productName: e.product.name,
+        slotCode: e.slot?.code ?? null,
+        quantity: e.quantity,
+        reason: e.reason,
+        cost: round2(Number(e.unitCost) * e.quantity),
+        notes: e.notes,
+        userName: e.user.name,
       })),
     };
   }
