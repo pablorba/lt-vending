@@ -37,6 +37,14 @@ módulo.
   specs de hardware que no estén confirmadas). Si falta algo, deja `TODO:`
   visible en el código o en el doc, no lo rellenes con un valor creíble.
 
+## Despliegue (solo Joaquín)
+
+Mismas reglas que `la-terraza-pos`: subir a GitHub no publica nada. Falta
+crear los proyectos en Railway (`railway.json` + `apps/api/Dockerfile` ya
+listos) y Vercel (root directory `apps/web`, sin `vercel.json`) — eso lo
+hace Joaquín con sus credenciales. Nunca el botón "Deploy" de Railway, nunca
+`railway redeploy` ni `railway delete`. Ver README para el detalle.
+
 ## Trampas técnicas conocidas (heredadas de La Terraza, mismo stack)
 
 - **Usa Node 22**, no Node 24: rompe Prisma 5.
@@ -67,3 +75,6 @@ módulo.
   adaptados a multi-tenant. Pruebas de los esquemas Zod en `packages/shared`.
   No probado contra una base real (sin Docker en la máquina donde se hizo).
   (Claude Sonnet 5)
+- 2026-11-03 — Matemática del surtido extraída a funciones puras
+  (`operations/restock-math.ts`) con pruebas; `railway.json` y
+  `apps/api/Dockerfile` listos para cuando Joaquín despliegue. (Claude Sonnet 5)

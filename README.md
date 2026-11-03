@@ -45,6 +45,27 @@ Web en `http://localhost:3100`, API en `http://localhost:3101/api/v1`.
 Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
 `.env.example`.
 
+## Despliegue (solo Joaquín — mismas reglas que La Terraza)
+
+Igual que en `la-terraza-pos`: **subir código a GitHub no publica nada**.
+Producción solo cambia cuando alguien despliega desde la terminal, con sus
+propias credenciales de Railway/Vercel.
+
+- **Backend** — `railway.json` + `apps/api/Dockerfile` ya están listos
+  (calcados de los de La Terraza, solo cambian los nombres de paquete).
+  Falta: crear el proyecto en Railway, agregar un Postgres, copiar las
+  variables de `.env.example` con valores reales (sobre todo `JWT_SECRET`,
+  generado con `openssl rand -hex 32`), y `railway up --ci` desde la raíz.
+- **Web** — sin `vercel.json`: en Vercel se crea el proyecto apuntando a
+  `apps/web` como root directory (igual que La Terraza) y se corre
+  `vercel --prod --yes`.
+- **Nunca** el botón "Deploy" del panel de Railway, **nunca**
+  `railway redeploy`, **nunca** `railway delete`.
+- El Dockerfile usa `prisma db push` al arrancar, no migraciones
+  versionadas — está bien para una base vacía, pero hay que cambiarlo a
+  `prisma migrate deploy` antes de que haya datos reales de un cliente que
+  no se puedan perder (ver el TODO en el Dockerfile).
+
 ## Estado
 
 - Monorepo, modelo multi-tenant (Tenant → Users → Machines → Products),
@@ -68,7 +89,6 @@ Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
   `operations/restock-math.ts` justo para poder probarla sin base de datos).
   20 pruebas, todas en verde. Faltan las de servicio contra una base real
   — necesitan Docker/Postgres, no disponibles al escribir esto.
-- Sin probar contra una base de datos real todavía (ver abajo).
 
 ## TODO conocidos
 
@@ -77,7 +97,9 @@ Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
   producto). Hoy el surtido se captura a mano, como en La Terraza.
 - Rutas de surtido (planeación de visitas, no solo el registro de cada una).
 - Planes y precios por número de máquinas (no definidos aún).
-- Despliegue (Railway/Vercel, como La Terraza) — no configurado todavía.
+- Despliegue real: Dockerfile y railway.json ya están listos (ver sección de
+  arriba), pero nadie ha creado todavía el proyecto en Railway/Vercel ni
+  corrido un deploy — necesita las credenciales de Joaquín.
 - Probar el flujo completo (registro → surtir → dashboard) contra Postgres
   real: esta máquina de desarrollo no tiene Docker instalado. Build y
   typecheck sí están verificados en los 4 paquetes.
