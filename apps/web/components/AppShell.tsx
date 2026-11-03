@@ -3,9 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
-import { LtvMark } from './LtvMark';
 import { LtvSplash } from './LtvSplash';
 
 const NAV = [
@@ -40,9 +40,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border bg-surface">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-text">
-              <LtvMark className="size-6" />
-              LT Vending
+            <Link href="/dashboard" className="flex items-center gap-1.5 font-semibold text-text">
+              <Image src="/logo-mark.png" alt="" width={75} height={52} className="h-7 w-auto" priority />
+              Vending
             </Link>
             <nav className="cascade flex gap-1">
               {NAV.map((item, i) => (

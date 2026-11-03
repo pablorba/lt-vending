@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuthStore } from '@/lib/auth-store';
-import { LtvMark } from '@/components/LtvMark';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,10 +44,14 @@ export default function LoginPage() {
         style={{ background: 'rgb(var(--accent-rgb) / 0.18)' }}
       />
       <div className="card w-full max-w-sm p-6 relative">
-        <div className="reveal-line [--i:0] flex items-center gap-2 mb-1">
-          <LtvMark className="size-7 text-text" />
-          <h1 className="text-xl font-semibold text-text">LT Vending</h1>
-        </div>
+        <Image
+          src="/logo-full.png"
+          alt="LT Vending"
+          width={180}
+          height={168}
+          priority
+          className="reveal-line [--i:0] w-28 h-auto mb-2"
+        />
         <p className="reveal-line [--i:1] text-sm text-muted mb-6">
           {mode === 'login' ? 'Entra a tu cuenta' : 'Crea la cuenta de tu operación'}
         </p>
