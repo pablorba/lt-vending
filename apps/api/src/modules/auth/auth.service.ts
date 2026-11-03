@@ -110,6 +110,11 @@ export class AuthService {
     return this.toUserPayload(user);
   }
 
+  /** Autoservicio: borra el tenant del usuario autenticado (cascada: usuarios, máquinas, etc). */
+  async deleteOwnTenant(tenantId: string): Promise<void> {
+    await this.prisma.tenant.delete({ where: { id: tenantId } });
+  }
+
   private signAccessToken(user: UserForToken): Promise<string> {
     return this.jwt.signAsync({
       sub: user.id,
