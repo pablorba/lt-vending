@@ -45,26 +45,38 @@ Web en `http://localhost:3100`, API en `http://localhost:3101/api/v1`.
 Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
 `.env.example`.
 
-## Despliegue (solo Joaquín — mismas reglas que La Terraza)
+## Despliegue
 
-Igual que en `la-terraza-pos`: **subir código a GitHub no publica nada**.
-Producción solo cambia cuando alguien despliega desde la terminal, con sus
-propias credenciales de Railway/Vercel.
+A diferencia de La Terraza (donde solo Joaquín despliega), **este sistema lo
+despliega Pablo, con sus propias cuentas de Railway y Vercel** — Joaquín no
+participa. Ya está publicado:
 
-- **Backend** — `railway.json` + `apps/api/Dockerfile` ya están listos
-  (calcados de los de La Terraza, solo cambian los nombres de paquete).
-  Falta: crear el proyecto en Railway, agregar un Postgres, copiar las
-  variables de `.env.example` con valores reales (sobre todo `JWT_SECRET`,
-  generado con `openssl rand -hex 32`), y `railway up --ci` desde la raíz.
-- **Web** — sin `vercel.json`: en Vercel se crea el proyecto apuntando a
-  `apps/web` como root directory (igual que La Terraza) y se corre
-  `vercel --prod --yes`.
-- **Nunca** el botón "Deploy" del panel de Railway, **nunca**
-  `railway redeploy`, **nunca** `railway delete`.
-- El Dockerfile usa `prisma db push` al arrancar, no migraciones
-  versionadas — está bien para una base vacía, pero hay que cambiarlo a
-  `prisma migrate deploy` antes de que haya datos reales de un cliente que
-  no se puedan perder (ver el TODO en el Dockerfile).
+- **Web (Vercel):** https://lt-vending.vercel.app
+- **API (Railway):** https://ltvapi-production.up.railway.app
+
+Infraestructura: proyecto Railway "perfect-peace" (servicio `@ltv/api` +
+Postgres), builder Dockerfile (`railway.json` + `apps/api/Dockerfile`, ya
+en el repo). Proyecto Vercel con root directory `apps/web`.
+
+**Trampas que ya nos costaron tiempo al desplegar — si se vuelve a crear el
+servicio de Railway, revisar esto:**
+
+1. Al importar el repo, Railway a veces crea un **"Custom Start Command"**
+   (ej. `pnpm start`) que **ignora el `CMD` del Dockerfile** — y con eso,
+   `prisma db push` nunca corre y las tablas no existen (error 500 genérico
+   al primer request que toque la base). Hay que dejar ese campo **vacío**
+   en Settings → Deploy.
+2. `CORS_ORIGINS` debe ser el dominio pelón (`https://lt-vending.vercel.app`),
+   **sin ruta** (`/login` al final, por ejemplo) — si no, el navegador
+   bloquea todo con "Failed to fetch" aunque el API sí esté viva.
+3. El Dockerfile usa `prisma db push` al arrancar, no migraciones
+   versionadas — está bien para una base vacía, pero hay que cambiarlo a
+   `prisma migrate deploy` antes de que haya datos reales de un cliente que
+   no se puedan perder (ver el TODO en el Dockerfile).
+
+Para depurar producción sin pedir capturas de pantalla: `npx @railway/cli
+login` (una vez, en tu Terminal) y luego `railway link`/`railway logs`/
+`railway run` desde el repo.
 
 ## Estado
 

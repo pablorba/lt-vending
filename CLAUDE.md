@@ -37,13 +37,16 @@ módulo.
   specs de hardware que no estén confirmadas). Si falta algo, deja `TODO:`
   visible en el código o en el doc, no lo rellenes con un valor creíble.
 
-## Despliegue (solo Joaquín)
+## Despliegue (Pablo, NO Joaquín)
 
-Mismas reglas que `la-terraza-pos`: subir a GitHub no publica nada. Falta
-crear los proyectos en Railway (`railway.json` + `apps/api/Dockerfile` ya
-listos) y Vercel (root directory `apps/web`, sin `vercel.json`) — eso lo
-hace Joaquín con sus credenciales. Nunca el botón "Deploy" de Railway, nunca
-`railway redeploy` ni `railway delete`. Ver README para el detalle.
+A diferencia de `la-terraza-pos`, aquí el que despliega es **Pablo**, con sus
+propias cuentas de Railway y Vercel — Joaquín no interviene. Ya está en vivo:
+web en https://lt-vending.vercel.app, API en
+https://ltvapi-production.up.railway.app (proyecto Railway "perfect-peace").
+`npx @railway/cli login` + `railway link` deja la sesión conectada para ver
+logs o correr comandos contra producción sin pedir capturas de pantalla.
+Trampas ya encontradas (Custom Start Command pisando el Dockerfile,
+CORS_ORIGINS con ruta de más) documentadas en el README, sección Despliegue.
 
 ## Trampas técnicas conocidas (heredadas de La Terraza, mismo stack)
 
@@ -84,3 +87,12 @@ hace Joaquín con sus credenciales. Nunca el botón "Deploy" de Railway, nunca
   de rutas se define después. Confirmado: sin precios/planes en este
   sistema (Joaquín negocia por cliente); registro abierto sin invitación
   por ahora; repo público en GitHub. (Claude Sonnet 5)
+- 2026-11-03 — Primer deploy real: Railway (API + Postgres) y Vercel (web),
+  con la cuenta de Pablo. Tres bugs encontrados y arreglados en el camino:
+  Custom Start Command de Railway pisando el CMD del Dockerfile (nunca
+  corría `prisma db push`, tablas inexistentes), `CORS_ORIGINS` con ruta de
+  más (`/login`) en vez del dominio pelón, y una condición de carrera en el
+  login persistido (`hasHydrated` en auth-store.ts) que mandaba a /login en
+  cada recarga aunque sí hubiera sesión. Probado de punta a punta en
+  producción: registro, login, crear máquina, planograma de 44 espirales.
+  (Claude Sonnet 5)

@@ -20,6 +20,12 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  // El store persistido tarda un instante en leer localStorage al cargar la
+  // página (recarga completa / entrar por un link directo). Hasta que esto
+  // sea true, isAuthenticated puede estar en falso aunque SÍ haya sesión
+  // guardada — por eso nadie debe redirigir a /login antes de esto.
+  hasHydrated: boolean;
+  setHasHydrated: (v: boolean) => void;
 
   login: (email: string, password: string) => Promise<void>;
   register: (tenantName: string, name: string, email: string, password: string) => Promise<void>;
@@ -51,6 +57,8 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      hasHydrated: false,
+      setHasHydrated: (v) => set({ hasHydrated: v }),
 
       async login(email, password) {
         const data = await authRequest('/auth/login', { email, password });
@@ -123,6 +131,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'ltv-auth',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );

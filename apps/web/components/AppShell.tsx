@@ -16,13 +16,16 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace('/login');
-  }, [isAuthenticated, router]);
+    // Antes de que el store termine de leer localStorage, isAuthenticated
+    // arranca en falso aunque SÍ haya sesión — esperar hasHydrated evita
+    // mandar a /login a alguien que sí tiene sesión en una recarga directa.
+    if (hasHydrated && !isAuthenticated) router.replace('/login');
+  }, [hasHydrated, isAuthenticated, router]);
 
-  if (!isAuthenticated) return null;
+  if (!hasHydrated || !isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-bg">
