@@ -62,8 +62,11 @@ Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
   recolectó.
 - **Dashboard**: ventas, utilidad, margen, merma, top de productos y la
   diferencia de caja (vendido vs. recogido), últimos 30 días.
-- **Pruebas**: `packages/shared` tiene pruebas de los esquemas Zod
-  (`pnpm test`, Node nativo). Faltan pruebas de servicio contra una base real
+- **Pruebas**: `pnpm test` corre las de `packages/shared` (esquemas Zod) y
+  `apps/api` (la matemática del surtido — vendido por diferencia, cobertura,
+  validación de capacidad — extraída a funciones puras en
+  `operations/restock-math.ts` justo para poder probarla sin base de datos).
+  20 pruebas, todas en verde. Faltan las de servicio contra una base real
   — necesitan Docker/Postgres, no disponibles al escribir esto.
 - Sin probar contra una base de datos real todavía (ver abajo).
 

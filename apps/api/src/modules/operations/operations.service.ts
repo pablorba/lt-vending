@@ -9,9 +9,9 @@ import type {
   UpdateSlotInput,
 } from '@ltv/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { compareRestockRows, computeCoverage, round2, soldQtyFromDiff, totalAfterRestock } from './restock-math';
 
 const D = (n: Prisma.Decimal | number | string) => new Prisma.Decimal(n);
-const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Lógica de planograma, surtido, merma y dinero recogido. Portada de
@@ -174,8 +174,7 @@ export class OperationsService {
       const slotLoaded = slot.items.reduce((a, i) => a + i.currentQty, 0);
       for (const it of slot.items) {
         const totalSold = soldBy.get(key(slot.id, it.productId)) ?? 0;
-        const perDay = daysMeasured > 0 ? round2(totalSold / daysMeasured) : 0;
-        const coverDays = perDay > 0 ? round2(it.currentQty / perDay) : null;
+        const { perDay, coverDays, urgent } = computeCoverage(totalSold, daysMeasured, it.currentQty);
         rows.push({
           slotId: slot.id,
           code: slot.code,
@@ -190,15 +189,12 @@ export class OperationsService {
           currentQty: it.currentQty,
           perDay,
           coverDays,
-          urgent: coverDays !== null ? coverDays < 1 : it.currentQty === 0,
+          urgent,
         });
       }
     }
 
-    rows.sort((a, b) => {
-      if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-      return (a.coverDays ?? 99) - (b.coverDays ?? 99);
-    });
+    rows.sort(compareRestockRows);
 
     return {
       machineId,
@@ -242,11 +238,7 @@ export class OperationsService {
       const touched = new Map(
         input.lines.filter((l) => l.slotId === slotId).map((l) => [l.productId, l]),
       );
-      let total = 0;
-      for (const it of slot.items) {
-        const l = touched.get(it.productId);
-        total += l ? l.foundQty + l.addedQty : it.currentQty;
-      }
+      const total = totalAfterRestock(slot.items, touched);
       if (total > slot.capacity) {
         throw new BadRequestException(
           `En ${slot.code} no caben ${total} piezas entre todos sus productos: la capacidad es ${slot.capacity}.`,
@@ -270,7 +262,7 @@ export class OperationsService {
         const price = D(item.product.price);
         const cost = D(item.product.cost);
         const expected = item.currentQty;
-        const soldQty = Math.max(0, expected - l.foundQty);
+        const soldQty = soldQtyFromDiff(expected, l.foundQty);
         const finalQty = l.foundQty + l.addedQty;
 
         const lineValue = price.times(soldQty);
