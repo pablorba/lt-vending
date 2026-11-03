@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+/** Agrega un espiral nuevo a una charola (nivel). Si el nivel no existe
+ * todavía en la máquina, lo crea — así también se agregan charolas nuevas. */
+export const addSlotSchema = z.object({
+  level: z.number().int().positive('El nivel debe ser mayor a 0'),
+  capacity: z.number().int().min(1, 'La capacidad debe ser al menos 1'),
+  /** Opcional: si no se manda, se genera como "{nivel}-{posición}". */
+  code: z.string().optional(),
+});
+export type AddSlotInput = z.infer<typeof addSlotSchema>;
+
 export const updateSlotSchema = z.object({
   code: z.string().min(1, 'El nombre del espiral no puede quedar vacío').optional(),
   capacity: z.number().int().min(1, 'La capacidad debe ser al menos 1').optional(),

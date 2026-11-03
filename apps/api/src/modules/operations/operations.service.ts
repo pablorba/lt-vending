@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@ltv/db';
-import { MAX_PRODUCTS_PER_SLOT } from '@ltv/shared';
 import type {
+  AddSlotInput,
   CreateRestockInput,
   RegisterCollectionInput,
   RegisterWasteInput,
@@ -32,6 +32,32 @@ export class OperationsService {
     return slot;
   }
 
+  /**
+   * Agrega un espiral a una charola (nivel). Si el nivel no existe todavía
+   * en la máquina, nace como charola nueva en la posición 1 — así también
+   * se agregan charolas completas, no solo espirales sueltos.
+   */
+  async addSlot(tenantId: string, machineId: string, input: AddSlotInput) {
+    const machine = await this.prisma.machine.findFirst({ where: { id: machineId, tenantId } });
+    if (!machine) throw new NotFoundException('Máquina no encontrada');
+
+    const last = await this.prisma.slot.findFirst({
+      where: { machineId, level: input.level },
+      orderBy: { position: 'desc' },
+    });
+    const position = (last?.position ?? 0) + 1;
+    const code = input.code?.trim() || `${input.level}-${String(position).padStart(2, '0')}`;
+
+    return this.prisma.slot.create({
+      data: { tenantId, machineId, level: input.level, position, code, capacity: input.capacity },
+    });
+  }
+
+  /**
+   * Quitar un espiral es desactivarlo (isActive=false vía updateSlot), no
+   * borrarlo: conserva el historial de surtidos/merma que ya tenga y
+   * desaparece del plan de reabasto y de nuevas asignaciones de producto.
+   */
   async updateSlot(tenantId: string, slotId: string, data: UpdateSlotInput) {
     await this.getSlotForTenant(tenantId, slotId);
 
@@ -60,22 +86,25 @@ export class OperationsService {
   }
 
   /**
-   * Define qué productos lleva un espiral (1 a 4). Reemplaza la lista: los
-   * que quites se borran, los que dejes conservan sus piezas cargadas.
+   * Define qué productos lleva un espiral. Reemplaza la lista: los que
+   * quites se borran, los que dejes conservan sus piezas cargadas. El
+   * máximo de productos distintos es configurable por máquina
+   * (Machine.maxProductsPerSlot, default 4).
    */
   async setSlotProducts(tenantId: string, slotId: string, input: SetSlotProductsInput) {
     const unique = [...new Set(input.productIds.filter(Boolean))];
-    if (unique.length > MAX_PRODUCTS_PER_SLOT) {
-      throw new BadRequestException(
-        `Un espiral admite máximo ${MAX_PRODUCTS_PER_SLOT} productos distintos.`,
-      );
-    }
 
     const slot = await this.prisma.slot.findFirst({
       where: { id: slotId, tenantId },
-      include: { items: true },
+      include: { items: true, machine: { select: { maxProductsPerSlot: true } } },
     });
     if (!slot) throw new NotFoundException('Espiral no encontrado');
+
+    if (unique.length > slot.machine.maxProductsPerSlot) {
+      throw new BadRequestException(
+        `Este espiral admite máximo ${slot.machine.maxProductsPerSlot} productos distintos.`,
+      );
+    }
 
     if (unique.length) {
       const owned = await this.prisma.product.count({

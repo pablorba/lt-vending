@@ -8,7 +8,7 @@ import {
   loginSchema,
   registerWasteSchema,
   DEFAULT_LAYOUT,
-  MAX_PRODUCTS_PER_SLOT,
+  DEFAULT_MAX_PRODUCTS_PER_SLOT,
 } from '../src/index';
 
 test('loginSchema rechaza correo inválido', () => {
@@ -61,6 +61,6 @@ test('registerWasteSchema rechaza una razón inválida', () => {
   assert.equal(result.success, false);
 });
 
-test('MAX_PRODUCTS_PER_SLOT es 4', () => {
-  assert.equal(MAX_PRODUCTS_PER_SLOT, 4);
+test('DEFAULT_MAX_PRODUCTS_PER_SLOT es 4', () => {
+  assert.equal(DEFAULT_MAX_PRODUCTS_PER_SLOT, 4);
 });

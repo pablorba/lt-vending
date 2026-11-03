@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
+  addSlotSchema,
   createRestockSchema,
   registerCollectionSchema,
   registerWasteSchema,
@@ -34,6 +35,15 @@ export class OperationsController {
   }
 
   // ----- Planograma -----
+  @Post('machines/:id/slots')
+  addSlot(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(addSlotSchema)) body: ReturnType<typeof addSlotSchema.parse>,
+  ) {
+    return this.service.addSlot(user.tenantId, id, body);
+  }
+
   @Patch('slots/:id')
   updateSlot(
     @CurrentUser() user: AuthenticatedUser,

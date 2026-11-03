@@ -78,3 +78,9 @@ hace Joaquín con sus credenciales. Nunca el botón "Deploy" de Railway, nunca
 - 2026-11-03 — Matemática del surtido extraída a funciones puras
   (`operations/restock-math.ts`) con pruebas; `railway.json` y
   `apps/api/Dockerfile` listos para cuando Joaquín despliegue. (Claude Sonnet 5)
+- 2026-11-03 — Planograma editable: agregar/quitar espirales en cualquier
+  charola, charolas nuevas, y `Machine.maxProductsPerSlot` configurable
+  (ya no fijo en 4). Pestaña `/rutas` creada vacía a propósito — el proceso
+  de rutas se define después. Confirmado: sin precios/planes en este
+  sistema (Joaquín negocia por cliente); registro abierto sin invitación
+  por ahora; repo público en GitHub. (Claude Sonnet 5)

@@ -70,11 +70,14 @@ propias credenciales de Railway/Vercel.
 
 - Monorepo, modelo multi-tenant (Tenant → Users → Machines → Products),
   auth por JWT (access + refresh).
-- **Planograma e inventario de la máquina**: cada máquina nace con su
-  planograma (espirales por nivel — 44 por defecto, el layout real de la
-  máquina de Capithal Park) y cada espiral puede llevar hasta 4 productos.
-  Portado de la lógica ya probada en `la-terraza-pos`
-  (`apps/api/src/modules/vending`), adaptado a multi-tenant.
+- **Planograma e inventario de la máquina**: cada máquina nace con el
+  planograma de 44 espirales de la máquina real de Capithal Park
+  (`DEFAULT_LAYOUT`, portado de `la-terraza-pos`), pero es solo el punto de
+  partida — **se puede modificar**: agregar o quitar un espiral de
+  cualquier charola (nivel), agregar charolas nuevas, y el número de
+  productos distintos que caben por espiral es configurable por máquina
+  (`Machine.maxProductsPerSlot`, default 4 — por si el modelo de máquina es
+  otro). "Quitar" un espiral lo desactiva (no borra su historial).
 - **Surtido**: registrar una visita calcula lo vendido por diferencia
   (esperado − encontrado), deja el espiral con la cantidad final y guarda
   valor/costo para el dashboard.
@@ -95,8 +98,11 @@ propias credenciales de Railway/Vercel.
 - Definir formato de los datos DEX y cómo llegan del hardware del splitter a
   la nube (puerto DEX lo ocupa Cantaloupe Cashless — ver contexto del
   producto). Hoy el surtido se captura a mano, como en La Terraza.
-- Rutas de surtido (planeación de visitas, no solo el registro de cada una).
-- Planes y precios por número de máquinas (no definidos aún).
+- **Rutas de surtido**: pestaña creada (`/rutas`), a propósito vacía —
+  "siguiente fase" — todavía no se define el proceso.
+- **Planes y precios**: fuera de alcance de este sistema. Joaquín negocia el
+  precio con cada cliente según cuántas máquinas mete — no va a haber
+  cuota mensual/instalación fija capturada aquí.
 - Despliegue real: Dockerfile y railway.json ya están listos (ver sección de
   arriba), pero nadie ha creado todavía el proyecto en Railway/Vercel ni
   corrido un deploy — necesita las credenciales de Joaquín.

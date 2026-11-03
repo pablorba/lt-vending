@@ -98,6 +98,10 @@ model Machine {
   location  String?
   isActive  Boolean  @default(true)
   notes     String?
+  /// Cuántos productos distintos caben en un mismo espiral de ESTA máquina.
+  /// Editable por si el modelo de máquina es distinto al de referencia
+  /// (AMS VISI Combo 39", 4 por espiral).
+  maxProductsPerSlot Int @default(4)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
