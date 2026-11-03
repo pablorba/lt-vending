@@ -61,3 +61,9 @@ módulo.
 
 - 2026-11-03 — Esqueleto inicial: monorepo, auth JWT, modelo Tenant/User/Machine,
   dashboard mínimo. (Claude Sonnet 5)
+- 2026-11-03 — Planograma, surtido, merma, dinero recogido y dashboard con
+  KPIs reales. Modelo de datos y lógica portados de `la-terraza-pos`
+  (módulo `vending`, que ya opera la máquina real de Capithal Park) y
+  adaptados a multi-tenant. Pruebas de los esquemas Zod en `packages/shared`.
+  No probado contra una base real (sin Docker en la máquina donde se hizo).
+  (Claude Sonnet 5)

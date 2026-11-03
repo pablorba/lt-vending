@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { apiFetch } from '@/lib/api';
 
@@ -66,7 +67,11 @@ export default function MachinesPage() {
       ) : (
         <div className="space-y-2">
           {machines.map((m) => (
-            <div key={m.id} className="card p-4 flex items-center justify-between">
+            <Link
+              key={m.id}
+              href={`/maquinas/${m.id}`}
+              className="card p-4 flex items-center justify-between hover:bg-surface-2 transition-colors"
+            >
               <div>
                 <p className="font-medium text-text">{m.name}</p>
                 {m.location && <p className="text-sm text-muted">{m.location}</p>}
@@ -80,7 +85,7 @@ export default function MachinesPage() {
               >
                 {m.isActive ? 'Activa' : 'Inactiva'}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}

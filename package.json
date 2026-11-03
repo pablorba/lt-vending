@@ -12,6 +12,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "db:generate": "pnpm --filter @ltv/db prisma:generate",
     "db:push": "pnpm --filter @ltv/db prisma:push",
     "db:migrate": "pnpm --filter @ltv/db prisma:migrate",

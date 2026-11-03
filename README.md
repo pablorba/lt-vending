@@ -47,16 +47,34 @@ Usuario demo tras el seed: ver `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` en
 
 ## Estado
 
-Esqueleto inicial: monorepo, modelo multi-tenant mínimo (Tenant → Users →
-Machines), auth por JWT (access + refresh), y un dashboard que lista las
-máquinas del operador. Sin inventario, ventas, alertas ni rutas todavía —
-eso es lo que sigue.
+- Monorepo, modelo multi-tenant (Tenant → Users → Machines → Products),
+  auth por JWT (access + refresh).
+- **Planograma e inventario de la máquina**: cada máquina nace con su
+  planograma (espirales por nivel — 44 por defecto, el layout real de la
+  máquina de Capithal Park) y cada espiral puede llevar hasta 4 productos.
+  Portado de la lógica ya probada en `la-terraza-pos`
+  (`apps/api/src/modules/vending`), adaptado a multi-tenant.
+- **Surtido**: registrar una visita calcula lo vendido por diferencia
+  (esperado − encontrado), deja el espiral con la cantidad final y guarda
+  valor/costo para el dashboard.
+- **Merma y dinero recogido**: para que la venta inferida no se infle con lo
+  que se atora, caduca o se roban, y para cuadrar contra lo que realmente se
+  recolectó.
+- **Dashboard**: ventas, utilidad, margen, merma, top de productos y la
+  diferencia de caja (vendido vs. recogido), últimos 30 días.
+- **Pruebas**: `packages/shared` tiene pruebas de los esquemas Zod
+  (`pnpm test`, Node nativo). Faltan pruebas de servicio contra una base real
+  — necesitan Docker/Postgres, no disponibles al escribir esto.
+- Sin probar contra una base de datos real todavía (ver abajo).
 
 ## TODO conocidos
 
 - Definir formato de los datos DEX y cómo llegan del hardware del splitter a
   la nube (puerto DEX lo ocupa Cantaloupe Cashless — ver contexto del
-  producto).
-- Procesos de surtido (rutas, tareas del surtidor).
+  producto). Hoy el surtido se captura a mano, como en La Terraza.
+- Rutas de surtido (planeación de visitas, no solo el registro de cada una).
 - Planes y precios por número de máquinas (no definidos aún).
 - Despliegue (Railway/Vercel, como La Terraza) — no configurado todavía.
+- Probar el flujo completo (registro → surtir → dashboard) contra Postgres
+  real: esta máquina de desarrollo no tiene Docker instalado. Build y
+  typecheck sí están verificados en los 4 paquetes.

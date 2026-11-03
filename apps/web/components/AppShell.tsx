@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/maquinas', label: 'Máquinas' },
+  { href: '/productos', label: 'Productos' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
