@@ -52,9 +52,9 @@ export default function ProductsPage() {
 
   return (
     <AppShell>
-      <h1 className="text-lg font-semibold text-text mb-4">Productos</h1>
+      <h1 className="reveal-line [--i:0] text-lg font-semibold text-text mb-4">Productos</h1>
 
-      <form onSubmit={onSubmit} className="card p-4 mb-6 grid grid-cols-1 sm:grid-cols-5 gap-3">
+      <form onSubmit={onSubmit} className="reveal-line [--i:1] card p-4 mb-6 grid grid-cols-1 sm:grid-cols-5 gap-3">
         <input
           className="input sm:col-span-2"
           placeholder="Nombre"
@@ -80,7 +80,7 @@ export default function ProductsPage() {
           value={cost}
           onChange={(e) => setCost(e.target.value)}
         />
-        <button type="submit" disabled={busy} className="btn-primary sm:col-span-5">
+        <button type="submit" disabled={busy} className="btn-primary press sm:col-span-5">
           Agregar producto
         </button>
         {error && <p className="text-sm text-danger sm:col-span-5">{error}</p>}
@@ -91,7 +91,7 @@ export default function ProductsPage() {
       ) : products.length === 0 ? (
         <p className="text-sm text-muted">Todavía no tienes productos.</p>
       ) : (
-        <div className="card overflow-hidden">
+        <div className="scroll-rise card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-surface-2 text-muted text-left">
               <tr>
@@ -108,7 +108,7 @@ export default function ProductsPage() {
                 const cost = Number(p.cost);
                 const margin = price > 0 ? Math.round(((price - cost) / price) * 100) : 0;
                 return (
-                  <tr key={p.id}>
+                  <tr key={p.id} className="hover:bg-surface-2">
                     <td className="px-4 py-2 text-text font-medium">{p.name}</td>
                     <td className="px-4 py-2 text-muted">{p.sku ?? '—'}</td>
                     <td className="px-4 py-2 text-text">${price.toFixed(2)}</td>

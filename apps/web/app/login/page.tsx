@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth-store';
+import { LtvMark } from '@/components/LtvMark';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,10 +37,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="card w-full max-w-sm p-6">
-        <h1 className="text-xl font-semibold text-text mb-1">LT Vending</h1>
-        <p className="text-sm text-muted mb-6">
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full blur-3xl"
+        style={{ background: 'rgb(var(--accent-rgb) / 0.18)' }}
+      />
+      <div className="card w-full max-w-sm p-6 relative">
+        <div className="reveal-line [--i:0] flex items-center gap-2 mb-1">
+          <LtvMark className="size-7 text-text" />
+          <h1 className="text-xl font-semibold text-text">LT Vending</h1>
+        </div>
+        <p className="reveal-line [--i:1] text-sm text-muted mb-6">
           {mode === 'login' ? 'Entra a tu cuenta' : 'Crea la cuenta de tu operación'}
         </p>
 
@@ -81,7 +90,7 @@ export default function LoginPage() {
 
           {error && <p className="text-sm text-danger">{error}</p>}
 
-          <button type="submit" disabled={busy} className="btn-primary btn-lg w-full">
+          <button type="submit" disabled={busy} className="btn-primary press btn-lg w-full">
             {busy ? 'Un momento…' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
           </button>
         </form>

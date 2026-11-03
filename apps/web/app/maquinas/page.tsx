@@ -40,9 +40,9 @@ export default function MachinesPage() {
 
   return (
     <AppShell>
-      <h1 className="text-lg font-semibold text-text mb-4">Máquinas</h1>
+      <h1 className="reveal-line [--i:0] text-lg font-semibold text-text mb-4">Máquinas</h1>
 
-      <form onSubmit={onSubmit} className="card p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <form onSubmit={onSubmit} className="reveal-line [--i:1] card p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <input
           className="input"
           placeholder="Nombre (ej. AMS VISI Combo 39&quot;)"
@@ -55,7 +55,7 @@ export default function MachinesPage() {
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
-        <button type="submit" disabled={busy} className="btn-primary whitespace-nowrap">
+        <button type="submit" disabled={busy} className="btn-primary press whitespace-nowrap">
           Agregar máquina
         </button>
       </form>
@@ -66,11 +66,12 @@ export default function MachinesPage() {
         <p className="text-sm text-muted">Todavía no tienes máquinas registradas.</p>
       ) : (
         <div className="space-y-2">
-          {machines.map((m) => (
+          {machines.map((m, i) => (
             <Link
               key={m.id}
               href={`/maquinas/${m.id}`}
-              className="card p-4 flex items-center justify-between hover:bg-surface-2 transition-colors"
+              style={{ '--i': i } as React.CSSProperties}
+              className="scroll-rise press card p-4 flex items-center justify-between hover:bg-surface-2"
             >
               <div>
                 <p className="font-medium text-text">{m.name}</p>

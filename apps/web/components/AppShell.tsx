@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
+import { LtvMark } from './LtvMark';
+import { LtvSplash } from './LtvSplash';
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -13,15 +15,21 @@ const NAV = [
   { href: '/rutas', label: 'Rutas' },
 ];
 
+// Variable de módulo (no de componente): solo se reinicia cuando el navegador
+// vuelve a ejecutar el script desde cero (carga completa / recarga). Una
+// navegación interna (<Link>) reutiliza el mismo módulo, así que el splash
+// no se repite al cambiar de pestaña dentro de la app — solo al abrir o
+// recargar, igual que en Vault.
+let splashShownThisLoad = false;
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, user, logout, hasHydrated } = useAuthStore();
+  const showSplash = useRef(hasHydrated && !splashShownThisLoad);
+  if (hasHydrated && !splashShownThisLoad) splashShownThisLoad = true;
 
   useEffect(() => {
-    // Antes de que el store termine de leer localStorage, isAuthenticated
-    // arranca en falso aunque SÍ haya sesión — esperar hasHydrated evita
-    // mandar a /login a alguien que sí tiene sesión en una recarga directa.
     if (hasHydrated && !isAuthenticated) router.replace('/login');
   }, [hasHydrated, isAuthenticated, router]);
 
@@ -32,17 +40,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border bg-surface">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-6">
-            <span className="font-semibold text-text">LT Vending</span>
-            <nav className="flex gap-1">
-              {NAV.map((item) => (
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-text">
+              <LtvMark className="size-6" />
+              LT Vending
+            </Link>
+            <nav className="cascade flex gap-1">
+              {NAV.map((item, i) => (
                 <Link
                   key={item.href}
                   href={item.href}
+                  style={{ '--i': i } as React.CSSProperties}
                   className={cn(
-                    'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                    'press px-3 py-2 rounded-md text-sm font-medium',
                     pathname?.startsWith(item.href)
                       ? 'bg-accent-soft text-accent'
-                      : 'text-muted hover:bg-surface-2',
+                      : 'text-muted hover:bg-surface-2 hover:text-text',
                   )}
                 >
                   {item.label}
@@ -57,14 +69,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 logout();
                 router.replace('/login');
               }}
-              className="btn-secondary px-3 py-1.5 text-sm"
+              className="btn-secondary press px-3 py-1.5 text-sm"
             >
               Salir
             </button>
           </div>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 py-6">{children}</main>
+      <main className={cn('max-w-5xl mx-auto px-4 py-6', showSplash.current && 'app-reveal')}>
+        {children}
+      </main>
+      {showSplash.current && <LtvSplash />}
     </div>
   );
 }

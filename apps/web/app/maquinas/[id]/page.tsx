@@ -101,7 +101,7 @@ export default function MachineDetailPage() {
 
   return (
     <AppShell>
-      <div className="mb-4 flex items-start justify-between flex-wrap gap-2">
+      <div className="reveal-line [--i:0] mb-4 flex items-start justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-lg font-semibold text-text">{machine.name}</h1>
           {machine.location && <p className="text-sm text-muted">{machine.location}</p>}
@@ -113,8 +113,8 @@ export default function MachineDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-5">
-          {byLevel.map(([level, slots]) => (
-            <div key={level}>
+          {byLevel.map(([level, slots], levelIdx) => (
+            <div key={level} className="scroll-rise" style={{ '--i': levelIdx } as React.CSSProperties}>
               <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                 Nivel {level}
               </p>
@@ -127,7 +127,7 @@ export default function MachineDetailPage() {
                       key={slot.id}
                       onClick={() => setPanel({ slotId: slot.id, mode: empty ? 'products' : 'restock' })}
                       className={cn(
-                        'w-28 rounded-lg border p-2 text-left transition-colors',
+                        'press w-28 rounded-lg border p-2 text-left',
                         !slot.isActive && 'opacity-50',
                         panel?.slotId === slot.id
                           ? 'border-accent bg-accent-soft'
@@ -193,7 +193,7 @@ export default function MachineDetailPage() {
           )}
         </div>
 
-        <div className="space-y-5">
+        <div className="reveal-line [--i:2] space-y-5">
           {activeSlot && panel?.mode === 'products' && (
             <SlotProductsPanel
               slot={activeSlot}
@@ -304,7 +304,7 @@ function SlotProductsPanel({
         ))}
         {products.length === 0 && <p className="text-sm text-muted">Agrega productos primero.</p>}
       </div>
-      <button onClick={save} disabled={busy} className="btn-primary w-full mt-3">
+      <button onClick={save} disabled={busy} className="btn-primary press w-full mt-3">
         Guardar
       </button>
     </div>
@@ -363,10 +363,10 @@ function AddSlotForm({
           value={capacity}
           onChange={(e) => setCapacity(e.target.value)}
         />
-        <button onClick={save} disabled={busy} className="btn-primary">
+        <button onClick={save} disabled={busy} className="btn-primary press">
           Crear charola
         </button>
-        <button onClick={onDone} className="btn-secondary">
+        <button onClick={onDone} className="btn-secondary press">
           Cancelar
         </button>
       </div>
@@ -383,10 +383,10 @@ function AddSlotForm({
         value={capacity}
         onChange={(e) => setCapacity(e.target.value)}
       />
-      <button onClick={save} disabled={busy} className="btn-primary w-full text-xs py-1">
+      <button onClick={save} disabled={busy} className="btn-primary press w-full text-xs py-1">
         Agregar
       </button>
-      <button onClick={onDone} className="btn-secondary w-full text-xs py-1">
+      <button onClick={onDone} className="btn-secondary press w-full text-xs py-1">
         Cancelar
       </button>
     </div>
@@ -442,10 +442,10 @@ function MaxProductsEditor({
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <button onClick={save} disabled={busy} className="btn-primary text-sm px-3 py-1.5">
+      <button onClick={save} disabled={busy} className="btn-primary press text-sm px-3 py-1.5">
         Guardar
       </button>
-      <button onClick={() => setEditing(false)} className="btn-secondary text-sm px-3 py-1.5">
+      <button onClick={() => setEditing(false)} className="btn-secondary press text-sm px-3 py-1.5">
         Cancelar
       </button>
     </div>
@@ -529,7 +529,7 @@ function SlotRestockPanel({
           </div>
         ))}
       </div>
-      <button onClick={save} disabled={busy} className="btn-primary w-full mt-3">
+      <button onClick={save} disabled={busy} className="btn-primary press w-full mt-3">
         Registrar surtido
       </button>
     </div>
@@ -596,7 +596,7 @@ function WastePanel({
             ))}
           </select>
         </div>
-        <button onClick={save} disabled={busy || !choice} className="btn-secondary w-full">
+        <button onClick={save} disabled={busy || !choice} className="btn-secondary press w-full">
           Registrar
         </button>
       </div>
@@ -657,7 +657,7 @@ function CollectionPanel({
           onChange={(e) => setCard(e.target.value)}
         />
       </div>
-      <button onClick={save} disabled={busy} className="btn-secondary w-full mt-2">
+      <button onClick={save} disabled={busy} className="btn-secondary press w-full mt-2">
         Registrar
       </button>
     </div>

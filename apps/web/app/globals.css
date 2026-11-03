@@ -3,52 +3,60 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------ */
-/* Design system de LT Vending: tokens semánticos.                     */
-/* Arquitectura tomada de Vault (finanzas-personales): variables CSS   */
-/* claro/oscuro, nunca colores sueltos en componentes. Los botones      */
-/* grandes y táctiles (abajo) vienen de La Terraza — el surtidor usa    */
-/* esto parado, con el celular, en el pasillo de la máquina.            */
-/* Acento propio (teal): no se repite ni el bronce de La Terraza ni el  */
-/* índigo de Vault.                                                     */
+/* Design system de LT Vending.                                        */
+/* Colores: los de La Terraza (ink/bone/ash/bronce) — sin el verde-teal */
+/* que traía antes. Arquitectura de variables claro/oscuro, cursor      */
+/* propio, splash de apertura y scroll-reveal: portados de Vault        */
+/* (finanzas-personales), que ya los construyó inspirados en Cesco      */
+/* (grupocesco.mx) — se recolorean aquí, no se reinventan.              */
+/* Nunca colores sueltos en componentes: siempre estas clases/tokens.   */
 /* ------------------------------------------------------------------ */
 :root {
-  --bg: #f4f5f7;
+  --bg: #ededed; /* bone */
   --surface: #ffffff;
-  --surface-2: #eceef1;
-  --border: #e2e4e8;
-  --text: #16181d;
-  --text-muted: #5b5f68;
-  --text-subtle: #7a7e87;
+  --surface-2: #e1e1e1;
+  --border: #d5d5d2;
+  --text: #151912; /* ink */
+  --text-muted: #5b5e54;
+  --text-subtle: #83867b;
 
-  --accent-rgb: 13 123 112; /* #0d7b70 */
-  --accent-soft: #e3f3f1;
+  --accent-rgb: 193 149 107; /* #c1956b — bronce de La Terraza */
+  --accent-soft: #f3e8da;
   --accent-fg: #ffffff;
 
-  --positive: #15803d;
-  --positive-soft: #e3f3e8;
-  --warning: #b45309;
+  --positive: #1a7a42;
+  --positive-soft: #e2f3e8;
+  --warning: #9a6200;
   --warning-soft: #fbedd9;
-  --danger-rgb: 185 28 28; /* #b91c1c */
+  --danger-rgb: 185 28 28;
   --danger-soft: #fbe6e3;
 
-  --shadow-card: 0 1px 3px rgb(22 24 29 / 0.08), 0 1px 2px rgb(22 24 29 / 0.04);
-  --shadow-float: 0 4px 12px rgb(22 24 29 / 0.12);
+  /* Movimiento (Vault, Fase 23): entrada "cerrojo", salida corta,       */
+  /* revelado de titulares (como Cesco), deslizar, y resorte al soltar.  */
+  --motion-lock: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-reveal: cubic-bezier(0.77, 0, 0.18, 1);
+  --motion-rise: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-card: 0 1px 3px rgb(21 25 18 / 0.08), 0 1px 2px rgb(21 25 18 / 0.04);
+  --shadow-float: 0 4px 16px rgb(21 25 18 / 0.14);
 
   color-scheme: light;
 }
 
 .dark {
-  --bg: #0b0c0e;
-  --surface: #17191c;
-  --surface-2: #212327;
-  --border: #2a2c31;
-  --text: #edeef0;
-  --text-muted: #a2a5ab;
-  --text-subtle: #76797f;
+  --bg: #121310;
+  --surface: #1c1e18;
+  --surface-2: #272a21;
+  --border: #35382c;
+  --text: #ededea;
+  --text-muted: #a9aca0;
+  --text-subtle: #7d8076;
 
-  --accent-rgb: 45 184 168; /* #2db8a8 */
-  --accent-soft: #10302c;
-  --accent-fg: #06201b;
+  --accent-rgb: 216 172 128; /* bronce más claro para fondo oscuro */
+  --accent-soft: #2e2317;
+  --accent-fg: #171510;
 
   --positive: #4ade80;
   --positive-soft: #122a1a;
@@ -115,4 +123,174 @@ textarea {
 
 .input {
   @apply w-full px-4 py-3 rounded-lg border border-border bg-surface text-text focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent;
+}
+
+/* ------------------------------------------------------------------ */
+/* Apertura de la app (como Vault/Cesco): el logo sube desde un         */
+/* desenfoque y la pantalla se desvanece; detrás, el contenido entra    */
+/* un poco subido. Solo CSS, una vez por carga completa. Decorativo:    */
+/* nunca recibe toques y desaparece con "reducir movimiento".           */
+/* ------------------------------------------------------------------ */
+.ltv-splash {
+  animation: splash-out 950ms linear both;
+}
+.ltv-splash-line {
+  animation: reveal-rise 650ms var(--motion-reveal) both;
+}
+.ltv-splash-line + .ltv-splash-line {
+  animation-delay: 110ms;
+}
+.app-reveal {
+  animation: app-reveal 480ms var(--motion-lock) 650ms backwards;
+}
+@keyframes splash-out {
+  0%,
+  70% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes app-reveal {
+  from {
+    translate: 0 14px;
+    opacity: 0.3;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Cursor propio (como el de Vault/Cesco): una bolita del bronce de La  */
+/* Terraza que sigue al puntero, con un halo que llega con un pequeño   */
+/* retraso y crece sobre lo que se puede tocar. Solo con mouse/trackpad */
+/* — en celular no existe. Hasta que el componente lo activa, se ve el  */
+/* cursor normal del sistema.                                          */
+/* ------------------------------------------------------------------ */
+.ltv-cursor {
+  display: none;
+}
+html[data-ltv-cursor] .ltv-cursor {
+  display: block;
+}
+html[data-ltv-cursor],
+html[data-ltv-cursor] * {
+  cursor: none !important;
+}
+html[data-ltv-cursor] :is(input:not([type="checkbox"], [type="radio"]), textarea, [contenteditable="true"]) {
+  cursor: text !important;
+}
+.ltv-cursor-dot,
+.ltv-cursor-halo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 9999px;
+  opacity: 0;
+  transition:
+    opacity 200ms ease,
+    width 300ms var(--motion-rise),
+    height 300ms var(--motion-rise);
+  will-change: transform;
+}
+.ltv-cursor-dot {
+  width: 14px;
+  height: 14px;
+  background: rgb(var(--accent-rgb));
+}
+.ltv-cursor-halo {
+  width: 34px;
+  height: 34px;
+  background: rgb(var(--accent-rgb) / 0.2);
+}
+html[data-ltv-cursor-visible] .ltv-cursor-dot,
+html[data-ltv-cursor-visible] .ltv-cursor-halo {
+  opacity: 1;
+}
+html[data-ltv-cursor-active] .ltv-cursor-halo {
+  width: 52px;
+  height: 52px;
+}
+html[data-ltv-cursor-active] .ltv-cursor-dot {
+  width: 8px;
+  height: 8px;
+}
+html[data-ltv-cursor-down] .ltv-cursor-halo {
+  width: 28px;
+  height: 28px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Titular que sube desde un desenfoque, una vez por pantalla.          */
+/* Se escalona con --i (0, 1, 2…) en varias líneas.                     */
+/* ------------------------------------------------------------------ */
+.reveal-line {
+  animation: reveal-rise 800ms var(--motion-reveal) both;
+  animation-delay: calc(min(var(--i, 0), 6) * 100ms + 50ms);
+}
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+    filter: blur(8px);
+  }
+}
+
+/* Respuesta al toque: se hunde rápido, regresa con un pequeño rebote. */
+.press {
+  transition-property: transform, scale, background-color, color, opacity, box-shadow;
+  transition-duration: 380ms;
+  transition-timing-function: var(--motion-spring);
+}
+.press:active {
+  scale: 0.96;
+  transition-duration: 90ms;
+  transition-timing-function: var(--motion-exit);
+}
+
+/* Listas/menús: renglones en cascada, uno tras otro (--i = posición). */
+.cascade > * {
+  animation: cascade-in 340ms var(--motion-lock) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 35ms);
+}
+@keyframes cascade-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Al deslizar (como Cesco): scroll-driven, solo CSS. Sin soporte de     */
+/* animation-timeline, se ve quieto y completo (degrada bien).          */
+/* ------------------------------------------------------------------ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: scroll-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 45%;
+    }
+  }
+}
+@keyframes scroll-rise {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ltv-splash {
+    display: none;
+  }
+  .app-reveal,
+  .reveal-line,
+  .cascade > * {
+    animation: none !important;
+    opacity: 1 !important;
+    translate: 0 0 !important;
+    filter: none !important;
+  }
 }
