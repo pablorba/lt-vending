@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
@@ -35,10 +35,5 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.auth.me(user.userId);
-  }
-
-  @Delete('account')
-  deleteAccount(@CurrentUser() user: AuthenticatedUser) {
-    return this.auth.deleteOwnTenant(user.tenantId);
   }
 }
