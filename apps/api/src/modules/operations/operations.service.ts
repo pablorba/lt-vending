@@ -336,11 +336,25 @@ export class OperationsService {
 
   /** Sin esto, todo lo que falta se contaría como vendido e infla las ventas. */
   async registerWaste(tenantId: string, input: RegisterWasteInput, userId: string) {
+    const machine = await this.prisma.machine.findFirst({
+      where: { id: input.machineId, tenantId },
+      select: { id: true },
+    });
+    if (!machine) throw new BadRequestException('Máquina no encontrada');
+
     const product = await this.prisma.product.findFirst({
       where: { id: input.productId, tenantId },
       select: { cost: true },
     });
     if (!product) throw new BadRequestException('Producto no encontrado');
+
+    if (input.slotId) {
+      const slot = await this.prisma.slot.findFirst({
+        where: { id: input.slotId, tenantId, machineId: input.machineId },
+        select: { id: true },
+      });
+      if (!slot) throw new BadRequestException('Ese espiral no es de esta máquina');
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const waste = await tx.wasteEntry.create({
@@ -373,7 +387,13 @@ export class OperationsService {
     });
   }
 
-  registerCollection(tenantId: string, input: RegisterCollectionInput, userId: string) {
+  async registerCollection(tenantId: string, input: RegisterCollectionInput, userId: string) {
+    const machine = await this.prisma.machine.findFirst({
+      where: { id: input.machineId, tenantId },
+      select: { id: true },
+    });
+    if (!machine) throw new BadRequestException('Máquina no encontrada');
+
     return this.prisma.collection.create({
       data: {
         tenantId,
