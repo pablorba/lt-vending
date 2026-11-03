@@ -1,0 +1,24 @@
+node_modules/
+dist/
+.next/
+.turbo/
+build/
+out/
+
+.env
+.env.local
+.env.*.local
+!.env.example
+
+*.log
+.DS_Store
+
+coverage/
+.nyc_output/
+
+# Prisma
+packages/db/prisma/migrations/dev*
+
+# IDE
+.vscode/
+.idea/

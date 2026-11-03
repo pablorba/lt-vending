@@ -1,0 +1,102 @@
+// =====================================================================
+// Schema LT Vending
+// Esqueleto inicial: multi-tenant mínimo (Tenant -> Users -> Machines).
+// Convenciones (iguales a la-terraza-pos, mismo stack):
+//   - IDs: cuid() — corto, sortable, sin colisiones
+//   - Dinero (cuando se agregue inventario/ventas): Decimal(12, 2) en MXN
+//   - Fechas en consultas agregadas: AT TIME ZONE 'America/Mexico_City'
+//     (todo se guarda en UTC)
+// =====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// MULTI-TENANT & AUTH
+// =====================================================================
+
+/// Un operador de vending (el cliente de LT Vending). Todo dato de negocio
+/// cuelga de un tenantId — ninguna query de negocio debe omitir este filtro.
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users    User[]
+  machines Machine[]
+
+  @@map("tenants")
+}
+
+enum UserRole {
+  /// Dueño/operador: ve ventas, utilidad, alertas, administra el tenant.
+  OWNER
+  /// Surtidor: ve su ruta y qué cargar. Entra desde el celular.
+  SURTIDOR
+}
+
+model User {
+  id           String    @id @default(cuid())
+  tenantId     String
+  // Único de forma global (no por tenant): una cuenta = un email = un tenant
+  // por ahora. Si en el futuro un mismo correo necesita pertenecer a varios
+  // tenants, esto cambia a @@unique([tenantId, email]) y el login deja de
+  // resolver el tenant solo con el email.
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         UserRole  @default(OWNER)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// =====================================================================
+// MÁQUINAS
+// =====================================================================
+
+/// Esqueleto: solo identidad y ubicación de la máquina. Inventario (slots,
+/// productos, stock) y captura de ventas (DEX) llegan en la siguiente fase.
+model Machine {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  location  String?
+  isActive  Boolean  @default(true)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("machines")
+}

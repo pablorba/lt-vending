@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Design system de LT Vending: tokens semánticos.                     */
+/* Arquitectura tomada de Vault (finanzas-personales): variables CSS   */
+/* claro/oscuro, nunca colores sueltos en componentes. Los botones      */
+/* grandes y táctiles (abajo) vienen de La Terraza — el surtidor usa    */
+/* esto parado, con el celular, en el pasillo de la máquina.            */
+/* Acento propio (teal): no se repite ni el bronce de La Terraza ni el  */
+/* índigo de Vault.                                                     */
+/* ------------------------------------------------------------------ */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eceef1;
+  --border: #e2e4e8;
+  --text: #16181d;
+  --text-muted: #5b5f68;
+  --text-subtle: #7a7e87;
+
+  --accent-rgb: 13 123 112; /* #0d7b70 */
+  --accent-soft: #e3f3f1;
+  --accent-fg: #ffffff;
+
+  --positive: #15803d;
+  --positive-soft: #e3f3e8;
+  --warning: #b45309;
+  --warning-soft: #fbedd9;
+  --danger-rgb: 185 28 28; /* #b91c1c */
+  --danger-soft: #fbe6e3;
+
+  --shadow-card: 0 1px 3px rgb(22 24 29 / 0.08), 0 1px 2px rgb(22 24 29 / 0.04);
+  --shadow-float: 0 4px 12px rgb(22 24 29 / 0.12);
+
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b0c0e;
+  --surface: #17191c;
+  --surface-2: #212327;
+  --border: #2a2c31;
+  --text: #edeef0;
+  --text-muted: #a2a5ab;
+  --text-subtle: #76797f;
+
+  --accent-rgb: 45 184 168; /* #2db8a8 */
+  --accent-soft: #10302c;
+  --accent-fg: #06201b;
+
+  --positive: #4ade80;
+  --positive-soft: #122a1a;
+  --warning: #f0b44c;
+  --warning-soft: #2d2413;
+  --danger-rgb: 255 110 100;
+  --danger-soft: #331a18;
+
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.03);
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.05), 0 12px 32px rgb(0 0 0 / 0.5);
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input,
+button,
+select,
+textarea {
+  font-size: 16px; /* evita el zoom automático en iOS Safari */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Botones grandes para el surtidor (celular, de pie, en el pasillo). */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold transition-colors active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply btn bg-accent text-accent-fg hover:bg-accent/90;
+}
+
+.btn-secondary {
+  @apply btn bg-surface text-text border border-border hover:bg-surface-2;
+}
+
+.btn-danger {
+  @apply btn bg-danger text-white hover:bg-danger/90;
+}
+
+.btn-lg {
+  @apply px-6 py-4 text-lg;
+}
+
+.card {
+  @apply bg-surface rounded-xl shadow-card border border-border;
+}
+
+.input {
+  @apply w-full px-4 py-3 rounded-lg border border-border bg-surface text-text focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent;
+}

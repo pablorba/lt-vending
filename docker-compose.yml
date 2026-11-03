@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ltvending-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ltvending
+      POSTGRES_PASSWORD: ltvending_dev
+      POSTGRES_DB: ltvending
+      TZ: America/Mexico_City
+    ports:
+      - "5433:5432"
+    volumes:
+      - ltvending_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ltvending -d ltvending"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ltvending_pgdata:
